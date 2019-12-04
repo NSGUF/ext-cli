@@ -1,0 +1,78 @@
+#!/usr/bin/env node
+process.env.NODE_PATH = __dirname + '/../node_modules/';
+
+const program = require('commander');
+const fs = require('fs');
+const chalk = require('chalk');
+const inquirer = require('inquirer');
+const ora = require('ora');
+const template = "direct:https://github.com/NSGUF/ext-cli/packgets/@ext/cli";
+const download = require('download-git-repo');
+
+const logo = `
+ _____  __  __  _____            ____   _       ___ 
+| ____| \\ \\/ / |_   _|          / ___| | |     |_ _|
+|  _|    \\  /    | |    _____  | |     | |      | | 
+| |___   /  \\    | |   |_____| | |___  | |___   | | 
+|_____| /_/\\_\\   |_|            \\____| |_____| |___|
+`
+
+program.version(require('../package').version);
+
+const bindHandler = {
+    init(otherParams) {
+        if(!otherParams){
+            program.help();
+            return;
+        }
+        inquirer.prompt([
+            {
+                type: 'list',
+                message: '请选择相对语言：',
+                choices: ["ECMAScript"],
+                name: 'kind'
+            }
+        ]).then(answers => {
+            let _dirname = otherParams;
+            if (_dirname) {
+                _dirname = `${process.cwd()}/${_dirname}`;
+                if (fs.existsSync(_dirname)) {
+                    console.error('该目录已经存在');
+                    return;
+                }
+                console.log(chalk.green(logo));
+                const spinner = ora("下载初始化模板...");
+                spinner.start();
+                download(template, ``, {
+                    clone: true
+                }, error => {
+                    spinner.stop();
+                    if (error) {
+                        console.error('下载失败', error.message.trim());
+                    } else {
+                        console.log(chalk.green("项目创建成功"));
+                    }
+                })
+            }
+        })
+
+    }
+}
+
+program.usage("[cmd] <options>")
+    .arguments("<cmd> [env]")
+    .action((cmd, otherParams) => {
+        const handler = bindHandler[cmd];
+        if (handler === undefined) {
+            console.log(chalk.red('非常遗憾，还没有该命令'));
+            process.exit(1);
+        } else {
+            handler(otherParams);
+        }
+    });
+
+program.parse(process.argv)
+
+if (!program.args.length) {
+    program.help()
+}
