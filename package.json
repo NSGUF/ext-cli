@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "ext脚手架",
   "bin": {
-    "cli": "./bin/cli"
+    "extcli": "./bin/cli"
   },
   "url": "https://github.com/NSGUF/ext-cli",
   "email": "1968083780@qq.com",
