@@ -6,7 +6,7 @@ const fs = require('fs');
 const chalk = require('chalk');
 const inquirer = require('inquirer');
 const ora = require('ora');
-const template = "direct:https://github.com/NSGUF/ext-cli/packgets/@ext/cli";
+const template = "direct:https://github.com/NSGUF/ext-cli";
 const download = require('download-git-repo');
 
 const logo = `
@@ -43,7 +43,7 @@ const bindHandler = {
                 console.log(chalk.green(logo));
                 const spinner = ora("下载初始化模板...");
                 spinner.start();
-                download(template, ``, {
+                download(template, _dirname, {
                     clone: true
                 }, error => {
                     spinner.stop();
