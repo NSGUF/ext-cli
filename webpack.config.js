@@ -1,5 +1,7 @@
 const path = require('path');
 
+const apiMocker = require('mocker-api');
+
 // html模板
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
@@ -8,6 +10,14 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 // 用了hash命名，所以需要清理文件夹
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+
+let filterArgs = (key) => {
+    const argv = process.argv;
+    const result = argv.find(item => item.match(key));
+    return result ? result.split('=')[1] : null;
+};
+
+let API_TYPE = filterArgs('-api') || '';
 
 module.exports = {
     mode: 'development',
@@ -80,6 +90,13 @@ module.exports = {
     devServer: {
         contentBase: path.join(__dirname, "dist"),
         compress: true,
-        port: 9000
+        port: 9000,
+        before(app) {
+            if (API_TYPE === 'mock') {
+                apiMocker(app, path.resolve('./mock/api/index.js'), {
+                    changeHost: true,
+                })
+            }
+        }
     }
 };
