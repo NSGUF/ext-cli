@@ -22,6 +22,7 @@ let API_TYPE = filterArgs('-api') || '';
 module.exports = {
     mode: 'development',
     entry: './src/index.js',
+    devtool: "source-map",
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: '[name].[hash].js'
@@ -53,7 +54,7 @@ module.exports = {
                 ],
             },
             {
-                test: /\.stylus$/,
+                test: /\.styl$/,
                 loader: [
                     require.resolve('style-loader'),
                     require.resolve('css-loader'),
@@ -82,7 +83,7 @@ module.exports = {
         new CopyWebpackPlugin([
             {
                 from: path.join(__dirname, 'public/ext'),
-                to: path.join(__dirname, 'dist/ext')
+                to: path.join(__dirname, 'dist/ext'),
             }
         ]),
         new CleanWebpackPlugin(),
