@@ -20,6 +20,7 @@ Morik.Office.MainingPanel = Ext.extend(Ext.TabPanel, {
             n = this.add(pn ? new pn(c) : Ext.apply(c, {
                 html: '你还没有实现该页面！'
             }))
+            n.setJsonValue(node.descriptions);
 
             n.show().doLayout();
         }

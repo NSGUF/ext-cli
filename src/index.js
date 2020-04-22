@@ -43,11 +43,7 @@ Ext.onReady(function () {
         rootVisible: false,
         root: new Ext.tree.AsyncTreeNode({
             expanded: true,
-            children: [{
-                id: "company",
-                text: "整理中",
-                leaf: true
-            }]
+            children: window.ALL_INFO
         })
     });
 

@@ -89,7 +89,16 @@ Morik.Office.ContainerPanel = Ext.extend(Ext.Panel, {
                 extraKeys: {"Ctrl": "autocomplete"},//ctrl可以弹出选择项
                 lineNumbers: true//显示行号
             });
+
         }
+    },
+
+    /**
+     * 更新界面数据
+     * @param desc
+     */
+    setJsonValue (desc) {
+        desc;
     },
 });
 

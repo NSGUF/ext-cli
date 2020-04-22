@@ -4,12 +4,13 @@ const apiMocker = require('mocker-api');
 
 // html模板
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const GeneratorAllInfoPlugin = require('./plugins/generator-all-info-plugin');
 
 // 将ext复制到dist中
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 // 用了hash命名，所以需要清理文件夹
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 
 let filterArgs = (key) => {
     const argv = process.argv;
@@ -68,7 +69,7 @@ module.exports = {
                         loader: 'file-loader',
                         options: {
                             name: 'static/images/[name].[hash:8].[ext]',
-                            useCache:true//构建缓存
+                            useCache: true//构建缓存
                         }
                     }
                 ]
@@ -78,7 +79,7 @@ module.exports = {
     plugins: [
         new HtmlWebpackPlugin({
             inject: true,
-            template: path.join(__dirname, 'public/index.html'),
+            template: path.join(__dirname, 'public/index.html')
         }),
         new CopyWebpackPlugin([
             {
@@ -86,7 +87,7 @@ module.exports = {
                 to: path.join(__dirname, 'dist/ext'),
             }
         ]),
-        new CleanWebpackPlugin(),
+        new GeneratorAllInfoPlugin({pathSource: __dirname + '/src/source/'})
     ],
     devServer: {
         contentBase: path.join(__dirname, "dist"),
