@@ -7,7 +7,7 @@
     "build": "webpack",
     "start": "webpack-dev-server",
     "dev-mock": "webpack-dev-server -api=mock",
-    "source": "node source.config" // 生成source文件的
+    "source": "node source.config"
  },
   "keywords": [],
   "author": "NSGUF",
