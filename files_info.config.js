@@ -4,22 +4,43 @@
 const fs = require('fs');
 
 /**
- * 获取最上面的描述
- * @param data
- * @returns {{notes: string, surplusData: string | *}}
+ * 删除注释中的*号和注释符号
+ * @param str
+ * @returns {string}
  */
-const getNotes = function (data) {
+const clearNotes = (str) => {
+    str = str.replace(/\/\*/g, ''); // 替换/*
+    str = str.replace(/\*\//g, ''); // 替换*/
+    str = str.replace(/\*/g, ''); // 替换*
+    str = str.replace(/\\n/g, '<br/>'); // 替换*
+    str = str.replace(/\\r\\n/g, '<br/>'); // 替换*
+
+    return str;
+};
+
+/**
+ * 获取最上面的描述，如果去空格后一/*开头，则找对应的结尾，可能有多个描述，所以要循环
+ */
+const getNotes = function (data, isBottom) {
     let notes = '';
     data = data.trim();
-    while (data.startsWith('/*')) {
-        const end = data.indexOf('*/');
-        let temp =  data.slice(0, end + 2).trim();
-        temp = temp.replace(/\/\*/g, ''); // 替换/*
-        temp = temp.replace(/\*\//g, ''); // 替换*/
-        temp = temp.replace(/\*/g, ''); // 替换*
+    if (isBottom) {
+        while (data.endsWith('*/')) {
+            let start = data.lastIndexOf('/*');
+            let temp =  data.slice(start).trim();
+            temp = clearNotes(temp);
+            notes += temp.trim() + '<br/>';
+            data = data.slice(0, start).trim();
+        }
 
-        notes += temp.trim() + '\n';
-        data = data.slice(end + 2).trim();
+    } else {
+        while (data.startsWith('/*')) {
+            const end = data.indexOf('*/');
+            let temp =  data.slice(0, end + 2).trim();
+            temp = clearNotes(temp);
+            notes += temp.trim() + '<br/>';
+            data = data.slice(end + 2).trim();
+        }
     }
 
     return {
@@ -30,8 +51,6 @@ const getNotes = function (data) {
 
 /**
  * 获取设置的类名
- * @param data
- * @returns {{surplusData: T[] | SharedArrayBuffer | BigUint64Array | Uint8ClampedArray | Uint32Array | Blob | Int16Array | T[] | Float64Array | Float32Array | string | Uint16Array | ArrayBuffer | Int32Array | BigInt64Array | Uint8Array | Int8Array | T[], className: string}}
  */
 const getClassName = function (data) {
     const end = data.indexOf('=');
@@ -44,6 +63,9 @@ const getClassName = function (data) {
     }
 };
 
+/**
+ * 获取父类
+ */
 const getFather = function (data) {
     let start = data.indexOf('Ext.extend');
     data = data.slice(start);
@@ -57,9 +79,14 @@ const getFather = function (data) {
     };
 };
 
+/**
+ * 获取所有的配置项
+ * @param data
+ * @returns {{configs: Array}}
+ */
 const getConfigs = function (data) {
     const configs = [];
-    let start, end = data.indexOf('function');
+    let end = data.indexOf('function');
     data = data.replace('{', ''); // 删除第一个{
     data = data.slice(1, end);
     end = data.lastIndexOf(',');
@@ -88,6 +115,59 @@ const getConfigs = function (data) {
     }
 };
 
+/**
+ * 获取所有的方法
+ *
+ *         {
+ *             name: 'url',
+ *             params: [
+ *                 ''
+ *             ]
+ *             description: ''
+ *         }
+ */
+const getPublicMethods = function (data) {
+    let publicMethods = [];
+    let dataArr = data.split('function');
+
+
+    for (let i = 0; i < dataArr.length - 1; i++) {
+        let currentData = dataArr[i].trim();
+        currentData = currentData.slice(0, currentData.length - 1).trim();
+        let end = currentData.lastIndexOf(' ');
+        let name = currentData.slice(end).trim();
+
+        if (name === 'constructor') {
+            continue;
+        }
+
+        let description = getNotes(currentData.slice(0, end), true).notes;
+        let nextData = dataArr[i + 1].trim();
+        let start = nextData.indexOf('(');
+        end = nextData.indexOf(')');
+        nextData = nextData.slice(start + 1, end);
+        let params = nextData.split(',');
+        params = params.map(item => {
+            return item.trim()
+        });
+
+        publicMethods.push({
+            name,
+            description,
+            params
+        })
+    }
+
+    return {
+        publicMethods
+    }
+};
+
+/**
+ * 获取所有的事件
+ * @param data
+ * @returns {{publicEvents: Array}}
+ */
 const getPublicEvents = function (data) {
     let publicEvents = [];
     let start, end;
@@ -133,7 +213,7 @@ const getPublicEvents = function (data) {
  *             defaultValue: '',
  *         }
  *     ],
- *     publicProperties: [
+ *     publicMethods: [
  *         {
  *             name: 'url',
  *             params: [
@@ -153,8 +233,11 @@ const getPublicEvents = function (data) {
  * @returns {{notes: string, father, publicEvents, publicProperties}}
  */
 const getDescriptions = function (data) {
-    let className, father, notes, configs, publicProperties, publicEvents, temp;
+    let className, father, notes, configs, publicMethods, publicEvents, temp, example;
+    let startExample = data.indexOf(':EXAM');
+    example = data.slice(startExample + 5);
 
+    data = data.slice(0, startExample);
     temp = getNotes(data);
     notes = temp.notes;
     surplusData = temp.surplusData;
@@ -169,7 +252,9 @@ const getDescriptions = function (data) {
 
     temp = getConfigs(surplusData);
     configs = temp.configs;
-    surplusData = temp.surplusData;
+
+    temp = getPublicMethods(surplusData);
+    publicMethods = temp.publicMethods;
 
     temp = getPublicEvents(data);
     publicEvents = temp.publicEvents;
@@ -179,8 +264,9 @@ const getDescriptions = function (data) {
         father,
         notes,
         configs,
-        publicProperties,
+        publicMethods,
         publicEvents,
+        example
     };
 };
 

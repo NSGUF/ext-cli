@@ -33,8 +33,8 @@ Ext.data.Store = Ext.extend(Ext.util.Observable, {
          * instead of a Record constructor, it will implicitly create a Record constructor from that Array (see
          * {@link Ext.data.Record}.{@link Ext.data.Record#create create} for additional details).</p>
          * <p>This property may be used to create new Records of the type held in this Store, for example:</p><pre><code>
-    // create the data store
-    var store = new Ext.data.ArrayStore({
+         // create the data store
+         var store = new Ext.data.ArrayStore({
         autoDestroy: true,
         fields: [
            {name: 'company'},
@@ -44,10 +44,10 @@ Ext.data.Store = Ext.extend(Ext.util.Observable, {
            {name: 'lastChange', type: 'date', dateFormat: 'n/j h:ia'}
         ]
     });
-    store.loadData(myData);
+         store.loadData(myData);
 
-    // create the Grid
-    var grid = new Ext.grid.EditorGridPanel({
+         // create the Grid
+         var grid = new Ext.grid.EditorGridPanel({
         store: store,
         colModel: new Ext.grid.ColumnModel({
             columns: [

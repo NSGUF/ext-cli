@@ -1,8 +1,6 @@
 import './components/left_menu';
-import './components/company_panel';
-import './components/echarts_panel';
-import './components/main_panel';
-import './components/container_panel';
+import MainPanel from './components/main_panel';
+import IntroductionPanel from './components/introduction_panel';
 
 import './static/css/main.styl';
 
@@ -25,19 +23,6 @@ Ext.onReady(function () {
         height: 0
     });
 
-    // 3、创建leftMenu部分
-    // var leftmenu = new Ext.Panel( {
-    // region : 'west',
-    // html : '<div>导航菜单</div>',
-    // width : 200
-    // });
-
-    // 4、创建主内容部分
-    // var mainTab = new Ext.Panel( {
-    // region : 'center',
-    // html : '<div>主内容部分</div>'
-    // });
-
     var t1 = new Ext.tree.TreePanel({
         border: false,
         rootVisible: false,
@@ -48,12 +33,13 @@ Ext.onReady(function () {
     });
 
 
+    // 3、创建leftMenu部分
     var leftmenu = new Morik.Office.LeftMenu({
         trees: [t1]
     });
 
-    var mainTab = new Morik.Office.MainingPanel({
-        style: 'padding:0 6px 0 0',
+    // 4、创建主内容部分
+    var mainTab = new MainPanel({
         autoScroll: true,
         region: 'center',
         deferredRender: false,
@@ -63,7 +49,7 @@ Ext.onReady(function () {
         tabWidth: 90,
         enableTabScroll: true,
         items: [
-            new Morik.Office.ContainerPanel()
+            new IntroductionPanel()
         ]
     });
 
@@ -71,6 +57,7 @@ Ext.onReady(function () {
     leftmenu.on("nodeClick", function (nodeAttr) {
         mainTab.loadTab(nodeAttr);
     });
+
     // 6、创建布局
     var viewport = new Ext.Viewport({
         layout: 'border',

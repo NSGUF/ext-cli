@@ -1,4 +1,4 @@
-Ext.ns("Morik", "Morik.Office", "Morik.Util", "Morik.Office.Department");
+Ext.ns("Morik", "Morik.Office");
 Morik.Office.LeftMenu = function (config) {
     var d = Ext.apply({// default set
         width: 200,
