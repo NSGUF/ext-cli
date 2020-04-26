@@ -19,7 +19,7 @@ let ContainerPanel = Ext.extend(Ext.Panel, {
     createItems() {
         this.textId = Ext.id('editor');
         this.items = [
-            this.container = new Ext.Container({
+            this.container = new Ext.BoxComponent({
                 data: {
                     "className": "-",
                     "father": "-",
@@ -37,15 +37,15 @@ let ContainerPanel = Ext.extend(Ext.Panel, {
                     '<div class="container-panel-little-title">描述：</div>' +
                     '<div class="container-panel-notes">{notes}</div>' +
                     '<div class="container-panel-little-title">配置项：</div>' +
-                    '<tpl for="configs">' +
-                    '<div class="container-panel-config-name">{[values.name]}</div>' +
+                    '<tpl for="values.configs">' +
+                    '<div class="container-panel-config-name">{[values.defaultValue]}</div>' +
                     '<div class="container-panel-config-def">默认值：{defaultValue}</div>' +
                     '<div class="container-panel-notes">描述：{description}</div>' +
                     '</tpl>' +
                     '<div class="container-panel-little-title">公共方法：</div>' +
                     '<tpl for="publicMethods">' +
                     '<div class="container-panel-name">{name}</div>' +
-                    '<div class="container-panel-config-def">参数：{:this.getParams(params)}</div>' +
+                    '<div class="container-panel-config-def">参数：{[.:this.getParams(params)]}</div>' +
                     '<div class="container-panel-notes">描述：{description}</div>' +
                     '</tpl>' +
                     '<div class="container-panel-little-title">事件：</div>' +
@@ -54,6 +54,29 @@ let ContainerPanel = Ext.extend(Ext.Panel, {
                     '<div class="container-panel-notes">描述：{description}</div>' +
                     '</tpl>', {
                         getParams: function (params) {
+                            debugger;
+                            return params.join('、');
+                        }
+                    }
+                )
+            }),
+            new Ext.BoxComponent({
+                data: {
+                    "configs": [{"name": "-", "description": "-", "defaultValue": "-"}]
+                },
+                tpl: new Ext.Template(
+                    '<div class="container-panel-title">类：{className}</div>' +
+                    '<div class="container-panel-little-title">继承自于：{father}</div>' +
+                    '<div class="container-panel-little-title">描述：</div>' +
+                    '<div class="container-panel-notes">{notes}</div>' +
+                    '<div class="container-panel-little-title">配置项：</div>' +
+                    '<tpl for="configs">' +
+                    '<div class="container-panel-config-name">{[values.defaultValue]}</div>' +
+                    '<div class="container-panel-config-def">默认值：{defaultValue}</div>' +
+                    '<div class="container-panel-notes">描述：{description}</div>' +
+                    '</tpl>', {
+                        getParams: function (params) {
+                            debugger;
                             return params.join('、');
                         }
                     }
@@ -61,44 +84,61 @@ let ContainerPanel = Ext.extend(Ext.Panel, {
             }),
             {
                 xtype: 'container',
-                cls: 'container-panel-box',
+                layout: {
+                    type: 'hbox',
+                    algin: 'stretch'
+                },
                 items: [
-                    new Ext.Button({
-                        text: '运行',
-                        handler: () => {
-                            let text = this.codeMirrorEditor.getValue();
-
-                            try {
-                                let textCom = eval(text);
-                                if (textCom) {
-                                    this.comResult.removeAll();
-                                    this.comResult.add(textCom);
-                                    this.comResult.doLayout();
-                                }
-                            } catch (e) {
-                                debugger;
-                            }
-                        },
-                        scope: this
-                    }), {
+                    {
                         xtype: 'container',
-                        layout: {
-                            type: 'hbox',
+                        cls: 'container-panel-box',
+                        items: [{
+                            xtype: 'container',
+                            cls: 'source-title',
+                            layout: 'hbox',
+                            items: [
+                                {
+                                    xtype: 'box',
+                                    cls: 'source-title-name',
+                                    html: '源代码如下：'
+                                }, new Ext.Button({
+                                    text: '点击运行',
+                                    cls: 'run-btn',
+                                    margins: '0 0 0 16',
+                                    handler: () => {
+                                        let text = this.codeMirrorEditor.getValue();
 
-                        },
+                                        try {
+                                            let textCom = eval(text);
+                                            if (textCom) {
+                                                this.comResult.removeAll();
+                                                this.comResult.add(textCom);
+                                                this.comResult.doLayout();
+                                            }
+                                        } catch (e) {
+                                            debugger;
+                                        }
+                                    },
+                                    scope: this
+                                })
+                            ]
+                        }, {
+                            xtype: 'box',
+                            width: 500,
+                            height: 500,
+                            html: '<textarea class="form-control-editor" id="' + this.textId + '" name="code"></textarea>'
+                        }]
+                    },
+                    {
+                        xtype: 'container',
+                        cls: 'container-panel-box',
                         items: [
                             {
                                 xtype: 'box',
-                                width: 500,
-                                height: 500,
-                                html: '<textarea class="form-control-editor" id="' + this.textId + '" name="code"></textarea>'
+                                html: '运行结果',
+                                cls: 'run-result-title'
                             },
-                            {
-                                xtype: 'container',
-                                items: [
-                                    this.comResult = new Ext.Container()
-                                ]
-                            }
+                            this.comResult = new Ext.Container()
                         ]
                     }
                 ]
