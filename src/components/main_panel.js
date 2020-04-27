@@ -17,9 +17,8 @@ const MainPanel = Ext.extend(Ext.TabPanel, {
             n.setJsonValue(node.descriptions);
 
             n.show().doLayout();
+            n.updateInfo(node.descriptions);
         }
-        if (n.ds)
-            n.ds.load({params: {start: 0, limit: 10}});
     }
 });
 

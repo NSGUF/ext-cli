@@ -12,7 +12,6 @@ let IntroductionPanel = Ext.extend(Ext.Panel, {
         this.items = [
             {
                 xtype: 'box',
-                cls: 'container-panel-box',
                 html: '将源码自动生成文档'
             },
         ]

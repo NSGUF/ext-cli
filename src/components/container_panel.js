@@ -12,7 +12,7 @@ let ContainerPanel = Ext.extend(Ext.Panel, {
     cls: 'container-panel',
 
     initComponent() {
-        this.createItems()
+        this.createItems();
         ContainerPanel.superclass.initComponent.call(this);
     },
 
@@ -23,36 +23,12 @@ let ContainerPanel = Ext.extend(Ext.Panel, {
                 data: {
                     "className": "-",
                     "father": "-",
-                    "notes": "-",
-                    "configs": [{"name": "-", "description": "-", "defaultValue": "-"}],
-                    "publicMethods": [{"name": "-", "description": "-", "params": ["-"]}],
-                    "publicEvents": [{
-                        "name": "",
-                        "description": ""
-                    }]
+                    "notes": "-"
                 },
                 tpl: new Ext.Template(
                     '<div class="container-panel-title">类：{className}</div>' +
                     '<div class="container-panel-little-title">继承自于：{father}</div>' +
-                    '<div class="container-panel-little-title">描述：</div>' +
-                    '<div class="container-panel-notes">{notes}</div>' +
-                    '<div class="container-panel-little-title">配置项：</div>' +
-                    '<tpl for="values.configs">' +
-                    '<div class="container-panel-config-name">{[values.defaultValue]}</div>' +
-                    '<div class="container-panel-config-def">默认值：{defaultValue}</div>' +
-                    '<div class="container-panel-notes">描述：{description}</div>' +
-                    '</tpl>' +
-                    '<div class="container-panel-little-title">公共方法：</div>' +
-                    '<tpl for="publicMethods">' +
-                    '<div class="container-panel-name">{name}</div>' +
-                    '<div class="container-panel-config-def">参数：{[.:this.getParams(params)]}</div>' +
-                    '<div class="container-panel-notes">描述：{description}</div>' +
-                    '</tpl>' +
-                    '<div class="container-panel-little-title">事件：</div>' +
-                    '<tpl for="publicEvents">' +
-                    '<div class="container-panel-name">{name}</div>' +
-                    '<div class="container-panel-notes">描述：{description}</div>' +
-                    '</tpl>', {
+                    '<div class="container-panel-notes">{notes}</div>', {
                         getParams: function (params) {
                             debugger;
                             return params.join('、');
@@ -60,27 +36,26 @@ let ContainerPanel = Ext.extend(Ext.Panel, {
                     }
                 )
             }),
-            new Ext.BoxComponent({
-                data: {
-                    "configs": [{"name": "-", "description": "-", "defaultValue": "-"}]
-                },
-                tpl: new Ext.Template(
-                    '<div class="container-panel-title">类：{className}</div>' +
-                    '<div class="container-panel-little-title">继承自于：{father}</div>' +
-                    '<div class="container-panel-little-title">描述：</div>' +
-                    '<div class="container-panel-notes">{notes}</div>' +
-                    '<div class="container-panel-little-title">配置项：</div>' +
-                    '<tpl for="configs">' +
-                    '<div class="container-panel-config-name">{[values.defaultValue]}</div>' +
-                    '<div class="container-panel-config-def">默认值：{defaultValue}</div>' +
-                    '<div class="container-panel-notes">描述：{description}</div>' +
-                    '</tpl>', {
-                        getParams: function (params) {
-                            debugger;
-                            return params.join('、');
-                        }
-                    }
-                )
+            {
+                xtype: 'box',
+                html: '<div class="container-panel-little-title">配置项：</div>'
+            },
+            this.configs = new Ext.BoxComponent({
+                cls: 'container-panel-info-box'
+            }),
+            {
+                xtype: 'box',
+                html: '<div class="container-panel-little-title">公共方法：</div>'
+            },
+            this.publicMethods = new Ext.BoxComponent({
+                cls: 'container-panel-info-box'
+            }),
+            {
+                xtype: 'box',
+                html: '<div class="container-panel-little-title">事件：</div>'
+            },
+            this.publicEvents = new Ext.BoxComponent({
+                cls: 'container-panel-info-box'
             }),
             {
                 xtype: 'container',
@@ -91,12 +66,16 @@ let ContainerPanel = Ext.extend(Ext.Panel, {
                 items: [
                     {
                         xtype: 'container',
+                        flex: 1,
                         cls: 'container-panel-box',
                         items: [{
                             xtype: 'container',
                             cls: 'source-title',
-                            layout: 'hbox',
-                            items: [
+                            layout: {
+                                type: 'hbox',
+                                algin: 'stretch'
+                            },
+                            items:  [
                                 {
                                     xtype: 'box',
                                     cls: 'source-title-name',
@@ -124,19 +103,22 @@ let ContainerPanel = Ext.extend(Ext.Panel, {
                             ]
                         }, {
                             xtype: 'box',
-                            width: 500,
-                            height: 500,
+                            layout: {
+                                type: 'hbox',
+                                algin: 'stretch'
+                            },
                             html: '<textarea class="form-control-editor" id="' + this.textId + '" name="code"></textarea>'
                         }]
                     },
                     {
                         xtype: 'container',
+                        flex: 1,
                         cls: 'container-panel-box',
                         items: [
                             {
                                 xtype: 'box',
                                 html: '运行结果',
-                                cls: 'run-result-title'
+                                cls: 'source-title'
                             },
                             this.comResult = new Ext.Container()
                         ]
@@ -150,16 +132,52 @@ let ContainerPanel = Ext.extend(Ext.Panel, {
         ContainerPanel.superclass.onLayout.call(this);
         let myTextarea = document.getElementById(this.textId);
         if (myTextarea && !this.codeMirrorEditor) {
-            this.codeMirrorEditor = CodeMirror.fromTextArea(myTextarea, {
+            this.codeMirrorEditor = this.codeMirrorEditor || CodeMirror.fromTextArea(myTextarea, {
                 mode: 'javascript',//编辑器语言
                 theme: 'monokai', //编辑器主题
                 extraKeys: {"Ctrl": "autocomplete"},//ctrl可以弹出选择项
                 lineNumbers: true//显示行号
             });
-
-
-            this.codeMirrorEditor.setValue(this.exampleText);
         }
+    },
+
+    updateConfig (desc) {
+        let html = '';
+        for(let i = 0; i < desc.configs.length; i++) {
+            let value = desc.configs[i];
+            html += `<div class="">配置名：<span class="config-name">${value.name}</span></div>
+                <div class="container-panel-config-def">默认值：${value.defaultValue}</div>
+                <div class="container-panel-notes">${value.description || '-'}</div>`;
+        }
+        this.configs.update(html);
+    },
+
+    updatePublicMethods (desc) {
+        let html = '';
+        for(let i = 0; i < desc.publicMethods.length; i++) {
+            let value = desc.publicMethods[i];
+            html += `<div class="">方法名：<span class="config-name">${value.name}</span></div>
+                <div class="container-panel-config-def">参数：${value.params.join('、') || '-'}</div>
+                <div class="container-panel-notes">${value.description || '-'}</div>`;
+        }
+        this.publicMethods.update(html);
+    },
+
+    updatePublicEvents (desc) {
+        let html = '';
+        for(let i = 0; i < desc.publicEvents.length; i++) {
+            let value = desc.publicEvents[i];
+            html += `<div class="">事件名：<span class="config-name">${value.name}</span></div>
+                <div class="container-panel-notes">${value.description || '-'}</div>`;
+        }
+        this.publicEvents.update(html);
+    },
+
+    updateInfo (desc) {
+        this.codeMirrorEditor.setValue(desc.example || '');
+        this.updateConfig(desc);
+        this.updatePublicMethods(desc);
+        this.updatePublicEvents(desc);
     },
 
     /**
@@ -172,7 +190,6 @@ let ContainerPanel = Ext.extend(Ext.Panel, {
         } else {
             this.container.data = desc;
         }
-        this.exampleText = desc.example;
     },
 });
 export default ContainerPanel;
