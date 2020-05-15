@@ -85,18 +85,7 @@ let ContainerPanel = Ext.extend(Ext.Panel, {
                                     cls: 'run-btn',
                                     margins: '0 0 0 16',
                                     handler: () => {
-                                        let text = this.codeMirrorEditor.getValue();
-
-                                        try {
-                                            let textCom = eval(text);
-                                            if (textCom) {
-                                                this.comResult.removeAll();
-                                                this.comResult.add(textCom);
-                                                this.comResult.doLayout();
-                                            }
-                                        } catch (e) {
-                                            debugger;
-                                        }
+                                        this.runExam();
                                     },
                                     scope: this
                                 })
@@ -126,6 +115,21 @@ let ContainerPanel = Ext.extend(Ext.Panel, {
                 ]
             }
         ]
+    },
+
+    runExam () {
+        let text = this.codeMirrorEditor.getValue();
+
+        try {
+            let textCom = eval(text);
+            if (textCom) {
+                this.comResult.removeAll();
+                this.comResult.add(textCom);
+                this.comResult.doLayout();
+            }
+        } catch (e) {
+            debugger;
+        }
     },
 
     onLayout() {
@@ -178,6 +182,8 @@ let ContainerPanel = Ext.extend(Ext.Panel, {
         this.updateConfig(desc);
         this.updatePublicMethods(desc);
         this.updatePublicEvents(desc);
+
+        this.runExam();
     },
 
     /**

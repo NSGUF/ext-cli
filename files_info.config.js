@@ -235,7 +235,7 @@ const getPublicEvents = function (data) {
 const getDescriptions = function (data) {
     let className, father, notes, configs, publicMethods, publicEvents, temp, example;
     let startExample = data.indexOf(':EXAM');
-    example = data.slice(startExample + 5);
+    example = startExample > -1 ? data.slice(startExample + 5) : '';
 
     data = data.slice(0, startExample);
     temp = getNotes(data);
