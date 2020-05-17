@@ -1,34 +1,29 @@
 Ext.ns("Morik", "Morik.Office");
-Morik.Office.LeftMenu = function (config) {
-    var d = Ext.apply({// default set
-        width: 200,
-        split: true,
-        region: 'west',
-        collapseMode: 'mini',
-        defaults: {
-            border: false
-        },
-        layoutConfig: {
-            animate: true
-        }
-    }, config || {});
 
-    config = Ext.apply(d, {
-        collapsible: true
-    });
+Morik.Office.LeftMenu = Ext.extend(Ext.Panel, {
+    defaults: {
+        border: false
+    },
+    constructor: function (config) {
+        Morik.Office.LeftMenu.superclass.constructor.call(this, config);
 
-    Morik.Office.LeftMenu.superclass.constructor.call(this, config);
+        //改进，并为增加了个配置项tree!
+        for (var i = 0; i < this.trees.length; i++)
+            this.add({title: this.trees[i].getRootNode().text, items: [this.trees[i]]});
 
-    //改进，并为增加了个配置项tree!
-    for (var i = 0; i < this.trees.length; i++)
-        this.add({title: this.trees[i].getRootNode().text, items: [this.trees[i]]});
+        // 事件处理
+        this.addEvents('nodeClick');
+        this.initTreeEvent();
+    },
 
-    // 事件处理
-    this.addEvents('nodeClick');
-    this.initTreeEvent();
-}
-
-Ext.extend(Morik.Office.LeftMenu, Ext.Panel, {
+    createItems: function () {
+        this.items = [
+            {
+                xtype: 'box',
+                html: 'test'
+            }
+        ];
+    },
     initTreeEvent: function () {
         if (!this.items) return;
         for (var i = 0; i < this.items.length; i++) {
@@ -47,4 +42,4 @@ Ext.extend(Morik.Office.LeftMenu, Ext.Panel, {
                 });
         }
     }
-})
+});

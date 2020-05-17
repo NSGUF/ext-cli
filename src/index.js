@@ -1,7 +1,7 @@
 import './components/left_menu';
 import MainPanel from './components/main_panel';
 import IntroductionPanel from './components/introduction_panel';
-
+import './components/search_field';
 import './static/css/main.styl';
 
 Ext.onReady(function () {
@@ -28,7 +28,7 @@ Ext.onReady(function () {
         rootVisible: false,
         root: new Ext.tree.AsyncTreeNode({
             expanded: true,
-            children: window.ALL_INFO
+            children: JSON.parse(JSON.stringify(window.ALL_INFO))
         })
     });
 
@@ -61,7 +61,50 @@ Ext.onReady(function () {
     // 6、创建布局
     var viewport = new Ext.Viewport({
         layout: 'border',
-        items: [head, foot, leftmenu, mainTab]
+        items: [head, foot, {
+            region: 'west',
+            split: true,
+            width: 200,
+            collapsible: true,
+            margins: '3 0 3 3',
+            cmargins: '3 3 3 3',
+            xtype: 'panel',
+            layoutConfig: {
+                animate: true
+            },
+            defaults: {
+                border: false
+            },
+            items: [
+                {
+                    xtype: 'container',
+                    cls: 'search-textfield',
+                    items: [
+                        new Ext.ux.form.SearchField({
+                            width: 180,
+                            onTrigger2Click: function () {
+                                var v = this.getRawValue();
+                                let newData = [];
+
+                                for (let i = 0; i < window.ALL_INFO.length; i++) {
+                                    let current = window.ALL_INFO[i];
+                                    if (JSON.stringify(current).indexOf(v) > -1) {
+                                        newData.push(current)
+                                    }
+                                }
+                                t1.setRootNode(
+                                    new Ext.tree.AsyncTreeNode({
+                                        expanded: true,
+                                        children: []
+                                    }))
+                                ;
+                            }
+                        })
+                    ]
+                },
+                leftmenu
+            ]
+        }, mainTab]
     });
 
 });
